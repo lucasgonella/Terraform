@@ -56,10 +56,12 @@ data "aws_ami" "ubuntu" {
   }
 }
 
-# Bloco import - Importar recurso existente
-import {
-  to = aws_instance.imported
-  id = "i-0123456789abcdef0"
+# Bloco module - Módulo reutilizável
+module "vpc" {
+  source = "./modules/vpc"
+
+  cidr_block = "10.0.0.0/16"
+  tags       = local.tags_comuns
 }
 
 # Bloco moved - Refatorar e mover recursos
@@ -68,13 +70,10 @@ moved {
   to   = aws_instance.example_renamed
 }
 
-# Bloco removed - Remover recurso do estado
-removed {
-  from = aws_instance.old_instance
-
-  lifecycle {
-    destroy = false
-  }
+# Bloco import - Importar recurso existente
+import {
+  to = aws_instance.imported
+  id = "i-0123456789abcdef0"
 }
 
 # Bloco check - Validar condições
@@ -85,10 +84,11 @@ check "instancia_running" {
   }
 }
 
-# Bloco module - Módulo reutilizável
-module "vpc" {
-  source = "./modules/vpc"
+# Bloco removed - Remover recurso do estado
+removed {
+  from = aws_instance.old_instance
 
-  cidr_block = "10.0.0.0/16"
-  tags       = local.tags_comuns
+  lifecycle {
+    destroy = false
+  }
 }
